@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 #include <iomanip>
-#include <stdexcept>  // For exceptions
+#include <stdexcept>  
 
 using namespace std;
 
@@ -18,7 +18,7 @@ struct Ticket {
 
 vector<User> users;
 vector<Ticket> tickets;
-vector<string> movies = {"Avatar", "Avengers", "Inception", "Titanic", "Joker"};
+vector<string> movies = {"Avatar", "Avenger", "Inception", "Titanic", "bajrangi"};
 vector<string> showTimes = {"12:00 PM", "3:00 PM", "6:00 PM", "9:00 PM"};
 
 void saveUsers() {
@@ -300,7 +300,7 @@ int main() {
                     }
                     break;
                 case 3:
-                    exit(0);
+                      exit(0);
                 default:
                     cout << "Invalid Choice! Try Again.\n";
             }
