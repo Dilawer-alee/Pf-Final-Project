@@ -18,7 +18,7 @@ struct Ticket {
 
 vector<User> users;
 vector<Ticket> tickets;
-vector<string> movies = {"Avatar", "Avengers", "Inception", "Titanic", "Joker"};
+vector<string> movies = {"Avatar", "Avengers", "Inception", "Titanic", "bajrangi"};
 vector<string> showTimes = {"12:00 PM", "3:00 PM", "6:00 PM", "9:00 PM"};
 
 void saveUsers() {
