@@ -1,71 +1,94 @@
-
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <iomanip>
+
 using namespace std;
 
-// Class for User Management
-class User {
-public:
+struct User {
     string username, password;
-    void registerUser();
-    bool loginUser();
 };
 
-// Class for Movie Ticket Booking
-class MovieBooking {
-private:
-    struct Ticket {
-        string movieName, username, showTime;
-        int seatNumber, price;
-    };
-    vector<string> movies = {"Avatar", "Avengers", "Inception", "Titanic", "Joker"};
-    vector<string> showTimes = {"12:00 PM", "3:00 PM", "6:00 PM", "9:00 PM"};
-
-public:
-    void displayMovies();
-    void bookTicket(string username);
-    void viewTickets(string username);
-    void cancelTicket(string username);
-    void manageMovies();
+struct Ticket {
+    string movieName, username, showTime;
+    int seatNumber, price;
 };
 
-// User Registration
-void User::registerUser() {
-    ofstream file("users.txt", ios::app);
-    cout << "Enter Username: ";
-    cin >> username;
-    cout << "Enter Password: ";
-    cin >> password;
-    file << username << " " << password << endl;
+vector<User> users;
+vector<Ticket> tickets;
+vector<string> movies = {"Avatar", "Avengers", "Inception", "Titanic", "Joker"};
+vector<string> showTimes = {"12:00 PM", "3:00 PM", "6:00 PM", "9:00 PM"};
+
+void saveUsers() {
+    ofstream file("users.txt");
+    for (const auto &user : users) {
+        file << user.username << " " << user.password << endl;
+    }
     file.close();
-    cout << "Registration Successful!\n";
 }
 
-// User Login
-bool User::loginUser() {
+void loadUsers() {
     ifstream file("users.txt");
-    string user, pass;
-    cout << "Enter Username: ";
-    cin >> username;
-    cout << "Enter Password: ";
-    cin >> password;
-
-    while (file >> user >> pass) {
-        if (user == username && pass == password) {
-            cout << "Login Successful!\n";
-            return true;
+    if (file) {
+        User user;
+        while (file >> user.username >> user.password) {
+            users.push_back(user);
         }
     }
     file.close();
+}
+
+void saveTickets() {
+    ofstream file("tickets.txt");
+    for (const auto &ticket : tickets) {
+        file << ticket.username << " " << ticket.movieName << " " << ticket.showTime << " "
+             << ticket.seatNumber << " " << ticket.price << endl;
+    }
+    file.close();
+}
+
+void loadTickets() {
+    ifstream file("tickets.txt");
+    if (file) {
+        Ticket ticket;
+        while (file >> ticket.username >> ticket.movieName >> ticket.showTime >> ticket.seatNumber >> ticket.price) {
+            tickets.push_back(ticket);
+        }
+    }
+    file.close();
+}
+
+void registerUser() {
+    User newUser;
+    cout << "Enter Username: ";
+    cin >> newUser.username;
+    cout << "Enter Password: ";
+    cin >> newUser.password;
+    users.push_back(newUser);
+    saveUsers();
+    cout << "Registration Successful!\n";
+}
+
+bool loginUser(string &currentUser) {
+    string username, password;
+    cout << "Enter Username: ";
+    cin >> username;
+    cout << "Enter Password: ";
+    cin >> password;
+
+    for (auto &user : users) {
+        if (user.username == username && user.password == password) {
+            cout << "Login Successful!\n";
+            currentUser = username;
+            return true;
+        }
+    }
     cout << "Invalid Credentials!\n";
     return false;
 }
 
-// Display Movies and Showtimes
-void MovieBooking::displayMovies() {
+void displayMovies() {
     cout << "\nAvailable Movies:\n";
     for (int i = 0; i < movies.size(); i++) {
         cout << i + 1 << ". " << movies[i] << endl;
@@ -76,14 +99,12 @@ void MovieBooking::displayMovies() {
     }
 }
 
-// Book a Ticket
-void MovieBooking::bookTicket(string username) {
+void bookTicket(string username) {
     displayMovies();
 
     int movieChoice, showTimeChoice, seatNumber, price;
     cout << "\nSelect Movie (1-" << movies.size() << "): ";
     cin >> movieChoice;
-
     if (movieChoice < 1 || movieChoice > movies.size()) {
         cout << "Invalid Movie Choice!\n";
         return;
@@ -91,7 +112,6 @@ void MovieBooking::bookTicket(string username) {
 
     cout << "Select Show Time (1-" << showTimes.size() << "): ";
     cin >> showTimeChoice;
-
     if (showTimeChoice < 1 || showTimeChoice > showTimes.size()) {
         cout << "Invalid Show Time!\n";
         return;
@@ -99,7 +119,6 @@ void MovieBooking::bookTicket(string username) {
 
     cout << "Enter Seat Number (1-100): ";
     cin >> seatNumber;
-
     if (seatNumber < 1 || seatNumber > 100) {
         cout << "Invalid Seat Number!\n";
         return;
@@ -108,45 +127,34 @@ void MovieBooking::bookTicket(string username) {
     cout << "Enter Ticket Price: ";
     cin >> price;
 
-    ofstream file("tickets.txt", ios::app);
-    file << username << " " << movies[movieChoice - 1] << " " 
-         << showTimes[showTimeChoice - 1] << " " << seatNumber << " " << price << endl;
-    file.close();
+    Ticket newTicket = {movies[movieChoice - 1], username, showTimes[showTimeChoice - 1], seatNumber, price};
+    tickets.push_back(newTicket);
+    saveTickets();
 
     cout << "\nTicket Booked Successfully!\n";
     cout << "Movie: " << movies[movieChoice - 1] << " | Time: " << showTimes[showTimeChoice - 1]
          << " | Seat: " << seatNumber << " | Price: $" << price << endl;
 }
 
-// View Booked Tickets
-void MovieBooking::viewTickets(string username) {
-    ifstream file("tickets.txt");
-    string user, movieName, showTime;
-    int seatNumber, price;
+void viewTickets(string username) {
     bool found = false;
-
     cout << "\nYour Booked Tickets:\n";
     cout << left << setw(15) << "Movie" << setw(15) << "Show Time" << setw(10) << "Seat" << "Price\n";
-    while (file >> user >> movieName >> showTime >> seatNumber >> price) {
-        if (user == username) {
+    for (auto &ticket : tickets) {
+        if (ticket.username == username) {
             found = true;
-            cout << left << setw(15) << movieName << setw(15) << showTime << setw(10)
-                 << seatNumber << "$" << price << endl;
+            cout << left << setw(15) << ticket.movieName << setw(15) << ticket.showTime << setw(10)
+                 << ticket.seatNumber << "$" << ticket.price << endl;
         }
     }
-    file.close();
     if (!found) {
         cout << "No Tickets Found!\n";
     }
 }
 
-// Cancel Ticket
-void MovieBooking::cancelTicket(string username) {
-    ifstream file("tickets.txt");
-    ofstream temp("temp.txt");
-
-    string user, movieName, showTime;
-    int seatNumber, price;
+void cancelTicket(string username) {
+    string movieName, showTime;
+    int seatNumber;
     bool found = false;
 
     cout << "Enter Movie Name: ";
@@ -157,27 +165,22 @@ void MovieBooking::cancelTicket(string username) {
     cout << "Enter Seat Number: ";
     cin >> seatNumber;
 
-    while (file >> user >> movieName >> showTime >> seatNumber >> price) {
-        if (user == username && movieName == movieName && showTime == showTime && seatNumber == seatNumber) {
+    for (auto it = tickets.begin(); it != tickets.end(); ++it) {
+        if (it->username == username && it->movieName == movieName && it->showTime == showTime && it->seatNumber == seatNumber) {
+            tickets.erase(it);
+            saveTickets();
             found = true;
             cout << "\nTicket Canceled Successfully!\n";
-        } else {
-            temp << user << " " << movieName << " " << showTime << " " << seatNumber << " " << price << endl;
+            break;
         }
     }
-
-    file.close();
-    temp.close();
-    remove("tickets.txt");
-    rename("temp.txt", "tickets.txt");
 
     if (!found) {
         cout << "No Matching Ticket Found!\n";
     }
 }
 
-// Admin Manage Movies
-void MovieBooking::manageMovies() {
+void manageMovies() {
     cout << "\n=== Admin Panel ===\n";
     cout << "1. Add Movie\n2. View Movies\nEnter Choice: ";
     int choice;
@@ -197,11 +200,11 @@ void MovieBooking::manageMovies() {
     }
 }
 
-// Main Menu
 int main() {
-    User user;
-    MovieBooking booking;
+    loadUsers();
+    loadTickets();
     int choice;
+    string currentUser;
 
     while (true) {
         cout << "\n=== Movie Ticket Booking System ===\n";
@@ -211,22 +214,34 @@ int main() {
 
         switch (choice) {
             case 1:
-                user.registerUser();
+                registerUser();
                 break;
             case 2:
-                if (user.loginUser()) break;
-                else continue;
+                loginUser(currentUser);
+                break;
             case 3:
-                booking.bookTicket(user.username);
+                if (!currentUser.empty()) {
+                    bookTicket(currentUser);
+                } else {
+                    cout << "Please log in first!\n";
+                }
                 break;
             case 4:
-                booking.viewTickets(user.username);
+                if (!currentUser.empty()) {
+                    viewTickets(currentUser);
+                } else {
+                    cout << "Please log in first!\n";
+                }
                 break;
             case 5:
-                booking.cancelTicket(user.username);
+                if (!currentUser.empty()) {
+                    cancelTicket(currentUser);
+                } else {
+                    cout << "Please log in first!\n";
+                }
                 break;
             case 6:
-                booking.manageMovies();
+                manageMovies();
                 break;
             case 7:
                 exit(0);
@@ -234,4 +249,6 @@ int main() {
                 cout << "Invalid Choice! Try Again.\n";
         }
     }
+
+    return 0;
 }
