@@ -2,248 +2,312 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include <map>
-#include <set>
 #include <iomanip>
+#include <stdexcept>  // For exceptions
 
 using namespace std;
 
-// Structure to represent a movie
-struct Movie {
-    string name;
-    string genre;
-    string showTimes[3]; // 3 show times per movie
-    int availableSeats[3]; // Available seats for each show time
-};
-
-// Structure to represent a user
 struct User {
-    string name;
-    string email;
-    string phone;
-    set<string> bookedTickets; // Unique booked tickets
+    string username, password;
 };
 
-// Function to load movies from a file
-vector<Movie> loadMoviesFromFile(const string& filename) {
-    vector<Movie> movies;
-    ifstream file(filename);
-    
-    if (!file.is_open()) {
-        cout << "Error: Unable to open movie file.\n";
-        return movies;
-    }
-    
-    Movie movie;
-    while (getline(file, movie.name) && getline(file, movie.genre)) {
-        for (int i = 0; i < 3; ++i) {
-            getline(file, movie.showTimes[i]);
-        }
+struct Ticket {
+    string movieName, username, showTime;
+    int seatNumber, price;
+};
 
-        // Read available seats and handle errors properly
-        if (!(file >> movie.availableSeats[0] >> movie.availableSeats[1] >> movie.availableSeats[2])) {
-            cout << "Error reading seat availability data for movie: " << movie.name << endl;
-            file.ignore();  // Skip the rest of the line if reading fails
-            continue;
-        }
+vector<User> users;
+vector<Ticket> tickets;
+vector<string> movies = {"Avatar", "Avengers", "Inception", "Titanic", "Joker"};
+vector<string> showTimes = {"12:00 PM", "3:00 PM", "6:00 PM", "9:00 PM"};
 
-        file.ignore();  // Ignore newline character after reading availableSeats
-
-        movies.push_back(movie);
-    }
-    file.close();
-    return movies;
-}
-
-// Function to save movies to a file
-void saveMoviesToFile(const string& filename, const vector<Movie>& movies) {
-    ofstream file(filename);
-    if (file.is_open()) {
-        for (const Movie& movie : movies) {
-            file << movie.name << endl;
-            file << movie.genre << endl;
-            for (int i = 0; i < 3; ++i) {
-                file << movie.showTimes[i] << endl;
-            }
-            file << movie.availableSeats[0] << " " << movie.availableSeats[1] << " " << movie.availableSeats[2] << endl;
+void saveUsers() {
+    try {
+        ofstream file("users.txt");
+        if (!file) throw runtime_error("Failed to open users file for writing.");
+        
+        for (const auto &user : users) {
+            file << user.username << " " << user.password << endl;
         }
         file.close();
-    } else {
-        cout << "Error: Unable to save movie file.\n";
+    } catch (const runtime_error &e) {
+        cout << "Error: " << e.what() << endl;
     }
 }
 
-// Function to load users from a file
-map<string, User> loadUsersFromFile(const string& filename) {
-    map<string, User> users;
-    ifstream file(filename);
-    
-    if (!file.is_open()) {
-        cout << "Error: Unable to open user file.\n";
-        return users;
-    }
-    
-    string name, email, phone, ticket;
-    while (getline(file, name) && getline(file, email) && getline(file, phone)) {
+void loadUsers() {
+    try {
+        ifstream file("users.txt");
+        if (!file) throw runtime_error("Failed to open users file for reading.");
+        
         User user;
-        user.name = name;
-        user.email = email;
-        user.phone = phone;
-        while (getline(file, ticket) && !ticket.empty()) {
-            user.bookedTickets.insert(ticket);
-        }
-        users[name] = user;
-    }
-    file.close();
-    return users;
-}
-
-// Function to save users to a file
-void saveUsersToFile(const string& filename, const map<string, User>& users) {
-    ofstream file(filename);
-    
-    if (file.is_open()) {
-        for (const auto& pair : users) {
-            const User& user = pair.second;
-            file << user.name << endl;
-            file << user.email << endl;
-            file << user.phone << endl;
-            for (const string& ticket : user.bookedTickets) {
-                file << ticket << endl;
-            }
-            file << endl; // Separate users
+        while (file >> user.username >> user.password) {
+            users.push_back(user);
         }
         file.close();
-    } else {
-        cout << "Error: Unable to save user file.\n";
+    } catch (const runtime_error &e) {
+        cout << "Error: " << e.what() << endl;
     }
 }
 
-// Function to display available movies
-void displayMovies(const vector<Movie>& movies) {
+void saveTickets() {
+    try {
+        ofstream file("tickets.txt");
+        if (!file) throw runtime_error("Failed to open tickets file for writing.");
+        
+        for (const auto &ticket : tickets) {
+            file << ticket.username << " " << ticket.movieName << " " << ticket.showTime << " "
+                 << ticket.seatNumber << " " << ticket.price << endl;
+        }
+        file.close();
+    } catch (const runtime_error &e) {
+        cout << "Error: " << e.what() << endl;
+    }
+}
+
+void loadTickets() {
+    try {
+        ifstream file("tickets.txt");
+        if (!file) throw runtime_error("Failed to open tickets file for reading.");
+        
+        Ticket ticket;
+        while (file >> ticket.username >> ticket.movieName >> ticket.showTime >> ticket.seatNumber >> ticket.price) {
+            tickets.push_back(ticket);
+        }
+        file.close();
+    } catch (const runtime_error &e) {
+        cout << "Error: " << e.what() << endl;
+    }
+}
+
+void registerUser() {
+    try {
+        User newUser;
+        cout << "Enter Username: ";
+        cin >> newUser.username;
+        cout << "Enter Password: ";
+        cin >> newUser.password;
+        users.push_back(newUser);
+        saveUsers();
+        cout << "Registration Successful!\n";
+    } catch (const exception &e) {
+        cout << "Error during registration: " << e.what() << endl;
+    }
+}
+
+bool loginUser(string &currentUser) {
+    try {
+        string username, password;
+        cout << "Enter Username: ";
+        cin >> username;
+        cout << "Enter Password: ";
+        cin >> password;
+
+        for (auto &user : users) {
+            if (user.username == username && user.password == password) {
+                cout << "Login Successful!\n";
+                currentUser = username;
+                return true;
+            }
+        }
+        cout << "Invalid Credentials!\n";
+        return false;
+    } catch (const exception &e) {
+        cout << "Error during login: " << e.what() << endl;
+        return false;
+    }
+}
+
+void displayMovies() {
     cout << "\nAvailable Movies:\n";
-    cout << setw(30) << left << "Movie Name" << setw(20) << left << "Genre" << endl;
-    for (const Movie& movie : movies) {
-        cout << setw(30) << left << movie.name << setw(20) << left << movie.genre << endl;
+    for (int i = 0; i < movies.size(); i++) {
+        cout << i + 1 << ". " << movies[i] << endl;
+    }
+    cout << "\nAvailable Show Times:\n";
+    for (int i = 0; i < showTimes.size(); i++) {
+        cout << i + 1 << ". " << showTimes[i] << endl;
     }
 }
 
-// Function to book tickets
-void bookTickets(vector<Movie>& movies, map<string, User>& users) {
-    string movieName, userName;
-    int numTickets, showIndex;
+void bookTicket(string username) {
+    try {
+        displayMovies();
 
-    cout << "\nEnter Movie Name: ";
-    cin.ignore();
-    getline(cin, movieName);
-
-    bool movieFound = false;
-    for (size_t i = 0; i < movies.size(); ++i) {
-        if (movies[i].name == movieName) {
-            movieFound = true;
-            cout << "\nAvailable Show Times for " << movieName << ":\n";
-            for (int j = 0; j < 3; ++j) {
-                cout << j + 1 << ". " << movies[i].showTimes[j] << " (Seats: " << movies[i].availableSeats[j] << ")\n";
-            }
-
-            cout << "Enter Show Time Index (1-3): ";
-            cin >> showIndex;
-
-            if (showIndex >= 1 && showIndex <= 3) {
-                showIndex--; // Adjust index to 0-based
-
-                cout << "Enter Number of Tickets: ";
-                cin >> numTickets;
-
-                if (numTickets > 0 && numTickets <= movies[i].availableSeats[showIndex]) {
-                    movies[i].availableSeats[showIndex] -= numTickets;
-
-                    cin.ignore();
-                    cout << "Enter User Name: ";
-                    getline(cin, userName);
-
-                    if (users.find(userName) == users.end()) {
-                        User user;
-                        user.name = userName;
-                        cout << "Enter Email: ";
-                        getline(cin, user.email);
-                        cout << "Enter Phone: ";
-                        getline(cin, user.phone);
-                        users[userName] = user;
-                    }
-
-                    string ticket = movieName + " - " + movies[i].showTimes[showIndex];
-                    users[userName].bookedTickets.insert(ticket);
-
-                    cout << "\nTickets Booked Successfully!" << endl;
-                } else {
-                    cout << "Invalid number of tickets or insufficient seats available." << endl;
-                }
-            } else {
-                cout << "Invalid show time index." << endl;
-            }
+        int movieChoice, showTimeChoice, seatNumber, price;
+        cout << "\nSelect Movie (1-" << movies.size() << "): ";
+        cin >> movieChoice;
+        if (movieChoice < 1 || movieChoice > movies.size()) {
+            cout << "Invalid Movie Choice!\n";
             return;
         }
-    }
 
-    if (!movieFound) {
-        cout << "Movie not found." << endl;
-    }
-}
-
-// Function to display user's booked tickets
-void displayBookedTickets(const map<string, User>& users) {
-    string userName;
-    cout << "Enter User Name: ";
-    cin.ignore();
-    getline(cin, userName);
-
-    if (users.find(userName) != users.end()) {
-        const User& user = users.at(userName);
-        cout << "\nBooked Tickets for " << userName << ":\n";
-        for (const string& ticket : user.bookedTickets) {
-            cout << "- " << ticket << endl;
+        cout << "Select Show Time (1-" << showTimes.size() << "): ";
+        cin >> showTimeChoice;
+        if (showTimeChoice < 1 || showTimeChoice > showTimes.size()) {
+            cout << "Invalid Show Time!\n";
+            return;
         }
-    } else {
-        cout << "User not found." << endl;
+
+        cout << "Enter Seat Number (1-100): ";
+        cin >> seatNumber;
+        if (seatNumber < 1 || seatNumber > 100) {
+            cout << "Invalid Seat Number!\n";
+            return;
+        }
+
+        cout << "Enter Ticket Price: ";
+        cin >> price;
+
+        Ticket newTicket = {movies[movieChoice - 1], username, showTimes[showTimeChoice - 1], seatNumber, price};
+        tickets.push_back(newTicket);
+        saveTickets();
+
+        cout << "\nTicket Booked Successfully!\n";
+        cout << "Movie: " << movies[movieChoice - 1] << " | Time: " << showTimes[showTimeChoice - 1]
+             << " | Seat: " << seatNumber << " | Price: $" << price << endl;
+    } catch (const exception &e) {
+        cout << "Error during ticket booking: " << e.what() << endl;
     }
 }
 
-int main() {
-    vector<Movie> movies = loadMoviesFromFile("movies.txt");
-    map<string, User> users = loadUsersFromFile("users.txt");
+void viewTickets(string username) {
+    try {
+        bool found = false;
+        cout << "\nYour Booked Tickets:\n";
+        cout << left << setw(15) << "Movie" << setw(15) << "Show Time" << setw(10) << "Seat" << "Price\n";
+        for (auto &ticket : tickets) {
+            if (ticket.username == username) {
+                found = true;
+                cout << left << setw(15) << ticket.movieName << setw(15) << ticket.showTime << setw(10)
+                     << ticket.seatNumber << "$" << ticket.price << endl;
+            }
+        }
+        if (!found) {
+            cout << "No Tickets Found!\n";
+        }
+    } catch (const exception &e) {
+        cout << "Error during viewing tickets: " << e.what() << endl;
+    }
+}
 
+void cancelTicket(string username) {
+    try {
+        string movieName, showTime;
+        int seatNumber;
+        bool found = false;
+
+        cout << "Enter Movie Name: ";
+        cin.ignore();
+        getline(cin, movieName);
+        cout << "Enter Show Time: ";
+        getline(cin, showTime);
+        cout << "Enter Seat Number: ";
+        cin >> seatNumber;
+
+        for (auto it = tickets.begin(); it != tickets.end(); ++it) {
+            if (it->username == username && it->movieName == movieName && it->showTime == showTime && it->seatNumber == seatNumber) {
+                tickets.erase(it);
+                saveTickets();
+                found = true;
+                cout << "\nTicket Canceled Successfully!\n";
+                break;
+            }
+        }
+
+        if (!found) {
+            cout << "No Matching Ticket Found!\n";
+        }
+    } catch (const exception &e) {
+        cout << "Error during ticket cancellation: " << e.what() << endl;
+    }
+}
+
+void manageMovies() {
+    try {
+        cout << "\n=== Admin Panel ===\n";
+        cout << "1. Add Movie\n2. View Movies\nEnter Choice: ";
+        int choice;
+        cin >> choice;
+
+        if (choice == 1) {
+            string newMovie;
+            cout << "Enter New Movie Name: ";
+            cin.ignore();
+            getline(cin, newMovie);
+            movies.push_back(newMovie);
+            cout << "Movie Added Successfully!\n";
+        } else if (choice == 2) {
+            displayMovies();
+        } else {
+            cout << "Invalid Choice!\n";
+        }
+    } catch (const exception &e) {
+        cout << "Error during movie management: " << e.what() << endl;
+    }
+}
+
+void displayLoggedInMenu(string &currentUser) {
     int choice;
-    do {
-        cout << "\nMovie Ticket Booking System\n";
-        cout << "1. Display Movies\n";
-        cout << "2. Book Tickets\n";
-        cout << "3. Display Booked Tickets\n";
-        cout << "4. Exit\n";
-        cout << "Enter your choice: ";
+    while (true) {
+        cout << "\n=== Movie Ticket Booking System ===\n";
+        cout << "1. Book Ticket\n2. View Tickets\n3. Cancel Ticket\n4. Admin Panel\n5. Logout\n";
+        cout << "Enter Your Choice: ";
         cin >> choice;
 
         switch (choice) {
             case 1:
-                displayMovies(movies);
+                bookTicket(currentUser);
                 break;
             case 2:
-                bookTickets(movies, users);
+                viewTickets(currentUser);
                 break;
             case 3:
-                displayBookedTickets(users);
+                cancelTicket(currentUser);
                 break;
             case 4:
-                cout << "Exiting...\n";
+                manageMovies();
                 break;
+            case 5:
+                currentUser = ""; // Logout
+                cout << "Logged out successfully!\n";
+                return;
             default:
-                cout << "Invalid choice.\n";
+                cout << "Invalid Choice! Try Again.\n";
         }
-    } while (choice != 4);
+    }
+}
 
-    saveMoviesToFile("movies.txt", movies);
-    saveUsersToFile("users.txt", users);
+int main() {
+    try {
+        loadUsers();
+        loadTickets();
+        int choice;
+        string currentUser;
+
+        while (true) {
+            cout << "\n=== Movie Ticket Booking System ===\n";
+            cout << "1. Register\n2. Login\n3. Exit\n";
+            cout << "Enter Your Choice: ";
+            cin >> choice;
+
+            switch (choice) {
+                case 1:
+                    registerUser();
+                    break;
+                case 2:
+                    if (loginUser(currentUser)) {
+                        displayLoggedInMenu(currentUser);
+                    }
+                    break;
+                case 3:
+                    exit(0);
+                default:
+                    cout << "Invalid Choice! Try Again.\n";
+            }
+        }
+    } catch (const exception &e) {
+        cout << "Unexpected Error: " << e.what() << endl;
+    }
 
     return 0;
 }
-
