@@ -61,13 +61,13 @@ void loadTickets() {
 
 void registerUser() {
     User newUser;
-    cout << "Enter Username: ";
+    cout << "Enter Username: " ;
     cin >> newUser.username;
-    cout << "Enter Password: ";
+    cout << "Enter Password: " ;
     cin >> newUser.password;
-    users.push_back(newUser);
+    users.push_back(newUser) ;
     saveUsers();
-    cout << "Registration Successful!\n";
+    cout << "Registration Successful!\n" ;
 }
 
 bool loginUser(string &currentUser) {
@@ -223,14 +223,14 @@ int main() {
                 if (!currentUser.empty()) {
                     bookTicket(currentUser);
                 } else {
-                    cout << "Please log in first!\n";
+                    cout << "Please log in first!\n" ;
                 }
                 break;
             case 4:
                 if (!currentUser.empty()) {
                     viewTickets(currentUser);
                 } else {
-                    cout << "Please log in first!\n";
+                    cout << "Please log in first!\n" ;
                 }
                 break;
             case 5:
@@ -244,11 +244,11 @@ int main() {
                 manageMovies();
                 break;
             case 7:
-                exit(0);
+                exit(0) ;
             default:
-                cout << "Invalid Choice! Try Again.\n";
+                cout << "Invalid Choice! Try Again.\n" ;
         }
     }
 
-    return 0;
+    return 0 ;
 }
