@@ -20,6 +20,7 @@ vector<User> users;
 vector<Ticket> tickets;
 vector<string> movies = {"Avatar", "Avenger", "Inception", "Titanic", "bajrangi"};
 vector<string> showTimes = {"12:00 PM", "3:00 PM", "6:00 PM", "9:00 PM"};
+vector<int> prices = {500, 500, 500, 1000};  // Default prices for the times: "12:00 PM", "3:00 PM", "6:00 PM", "9:00 PM"
 
 void saveUsers() {
     try {
@@ -133,7 +134,7 @@ void bookTicket(string username) {
     try {
         displayMovies();
 
-        int movieChoice, showTimeChoice, seatNumber, price;
+        int movieChoice, showTimeChoice, seatNumber;
         cout << "\nSelect Movie (1-" << movies.size() << "): ";
         cin >> movieChoice;
         if (movieChoice < 1 || movieChoice > movies.size()) {
@@ -155,8 +156,8 @@ void bookTicket(string username) {
             return;
         }
 
-        cout << "Enter Ticket Price: ";
-        cin >> price;
+        // Use the price from the 'prices' vector based on the selected showtime
+        int price = prices[showTimeChoice - 1];
 
         Ticket newTicket = {movies[movieChoice - 1], username, showTimes[showTimeChoice - 1], seatNumber, price};
         tickets.push_back(newTicket);
@@ -164,7 +165,7 @@ void bookTicket(string username) {
 
         cout << "\nTicket Booked Successfully!\n";
         cout << "Movie: " << movies[movieChoice - 1] << " | Time: " << showTimes[showTimeChoice - 1]
-             << " | Seat: " << seatNumber << " | Price: $" << price << endl;
+             << " | Seat: " << seatNumber << " | Price: PKR " << price << endl;
     } catch (const exception &e) {
         cout << "Error during ticket booking: " << e.what() << endl;
     }
@@ -179,7 +180,7 @@ void viewTickets(string username) {
             if (ticket.username == username) {
                 found = true;
                 cout << left << setw(15) << ticket.movieName << setw(15) << ticket.showTime << setw(10)
-                     << ticket.seatNumber << "$" << ticket.price << endl;
+                     << ticket.seatNumber << "PKR " << ticket.price << endl;
             }
         }
         if (!found) {
@@ -225,7 +226,7 @@ void cancelTicket(string username) {
 void manageMovies() {
     try {
         cout << "\n=== Admin Panel ===\n";
-        cout << "1. Add Movie\n2. View Movies\nEnter Choice: ";
+        cout << "1. Add Movie\n2. View Movies\n3. Adjust Ticket Prices\nEnter Choice: ";
         int choice;
         cin >> choice;
 
@@ -238,6 +239,14 @@ void manageMovies() {
             cout << "Movie Added Successfully!\n";
         } else if (choice == 2) {
             displayMovies();
+        } else if (choice == 3) {
+            // Adjust ticket prices
+            for (int i = 0; i < showTimes.size(); i++) {
+                cout << "\nCurrent price for " << showTimes[i] << ": PKR " << prices[i] << endl;
+                cout << "Enter new price for " << showTimes[i] << ": ";
+                cin >> prices[i];
+                cout << "Price updated for " << showTimes[i] << " to PKR " << prices[i] << endl;
+            }
         } else {
             cout << "Invalid Choice!\n";
         }
@@ -300,7 +309,7 @@ int main() {
                     }
                     break;
                 case 3:
-                      exit(0);
+                    exit(0);
                 default:
                     cout << "Invalid Choice! Try Again.\n";
             }
