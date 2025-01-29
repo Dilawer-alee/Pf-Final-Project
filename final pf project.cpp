@@ -3,7 +3,11 @@
 #include <string>
 #include <vector>
 #include <iomanip>
+<<<<<<< HEAD
 #include <stdexcept>  
+=======
+#include <stdexcept>  // For exceptions
+>>>>>>> 6bcc748668e4447a7623ce0a191ee4c5e7a6e0c3
 
 using namespace std;
 
@@ -18,9 +22,14 @@ struct Ticket {
 
 vector<User> users;
 vector<Ticket> tickets;
+<<<<<<< HEAD
 vector<string> movies = {"Avatar", "Avenger", "Inception", "Titanic", "bajrangi"};
 vector<string> showTimes = {"12:00 PM", "3:00 PM", "6:00 PM", "9:00 PM"};
 vector<int> prices = {500, 500, 500, 1000};  // Default prices for the times: "12:00 PM", "3:00 PM", "6:00 PM", "9:00 PM"
+=======
+vector<string> movies = {"Avatar", "Avengers", "Inception", "Titanic", "bajrangi"};
+vector<string> showTimes = {"12:00 PM", "3:00 PM", "6:00 PM", "9:00 PM"};
+>>>>>>> 6bcc748668e4447a7623ce0a191ee4c5e7a6e0c3
 
 void saveUsers() {
     try {
@@ -134,7 +143,11 @@ void bookTicket(string username) {
     try {
         displayMovies();
 
+<<<<<<< HEAD
         int movieChoice, showTimeChoice, seatNumber;
+=======
+        int movieChoice, showTimeChoice, seatNumber, price;
+>>>>>>> 6bcc748668e4447a7623ce0a191ee4c5e7a6e0c3
         cout << "\nSelect Movie (1-" << movies.size() << "): ";
         cin >> movieChoice;
         if (movieChoice < 1 || movieChoice > movies.size()) {
@@ -156,8 +169,13 @@ void bookTicket(string username) {
             return;
         }
 
+<<<<<<< HEAD
         // Use the price from the 'prices' vector based on the selected showtime
         int price = prices[showTimeChoice - 1];
+=======
+        cout << "Enter Ticket Price: ";
+        cin >> price;
+>>>>>>> 6bcc748668e4447a7623ce0a191ee4c5e7a6e0c3
 
         Ticket newTicket = {movies[movieChoice - 1], username, showTimes[showTimeChoice - 1], seatNumber, price};
         tickets.push_back(newTicket);
@@ -165,7 +183,11 @@ void bookTicket(string username) {
 
         cout << "\nTicket Booked Successfully!\n";
         cout << "Movie: " << movies[movieChoice - 1] << " | Time: " << showTimes[showTimeChoice - 1]
+<<<<<<< HEAD
              << " | Seat: " << seatNumber << " | Price: PKR " << price << endl;
+=======
+             << " | Seat: " << seatNumber << " | Price: $" << price << endl;
+>>>>>>> 6bcc748668e4447a7623ce0a191ee4c5e7a6e0c3
     } catch (const exception &e) {
         cout << "Error during ticket booking: " << e.what() << endl;
     }
@@ -180,7 +202,11 @@ void viewTickets(string username) {
             if (ticket.username == username) {
                 found = true;
                 cout << left << setw(15) << ticket.movieName << setw(15) << ticket.showTime << setw(10)
+<<<<<<< HEAD
                      << ticket.seatNumber << "PKR " << ticket.price << endl;
+=======
+                     << ticket.seatNumber << "$" << ticket.price << endl;
+>>>>>>> 6bcc748668e4447a7623ce0a191ee4c5e7a6e0c3
             }
         }
         if (!found) {
@@ -226,7 +252,11 @@ void cancelTicket(string username) {
 void manageMovies() {
     try {
         cout << "\n=== Admin Panel ===\n";
+<<<<<<< HEAD
         cout << "1. Add Movie\n2. View Movies\n3. Adjust Ticket Prices\nEnter Choice: ";
+=======
+        cout << "1. Add Movie\n2. View Movies\nEnter Choice: ";
+>>>>>>> 6bcc748668e4447a7623ce0a191ee4c5e7a6e0c3
         int choice;
         cin >> choice;
 
@@ -239,6 +269,7 @@ void manageMovies() {
             cout << "Movie Added Successfully!\n";
         } else if (choice == 2) {
             displayMovies();
+<<<<<<< HEAD
         } else if (choice == 3) {
             // Adjust ticket prices
             for (int i = 0; i < showTimes.size(); i++) {
@@ -247,6 +278,8 @@ void manageMovies() {
                 cin >> prices[i];
                 cout << "Price updated for " << showTimes[i] << " to PKR " << prices[i] << endl;
             }
+=======
+>>>>>>> 6bcc748668e4447a7623ce0a191ee4c5e7a6e0c3
         } else {
             cout << "Invalid Choice!\n";
         }
@@ -318,5 +351,9 @@ int main() {
         cout << "Unexpected Error: " << e.what() << endl;
     }
 
+<<<<<<< HEAD
     return 0;
+=======
+    return 0;
+>>>>>>> 6bcc748668e4447a7623ce0a191ee4c5e7a6e0c3
 }
